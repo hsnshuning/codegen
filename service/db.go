@@ -1,2 +1,5 @@
 package codegen
 
+func init() {
+
+}
