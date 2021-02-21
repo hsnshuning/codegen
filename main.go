@@ -1,9 +1,10 @@
 package main
 
 import (
-	"codegen"
+	"codegen/service"
+	_ "codegen/service"
 )
 
 func main() {
-
+	service.NewGenCode().Gen()
 }
