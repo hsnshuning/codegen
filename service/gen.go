@@ -31,10 +31,11 @@ type Columns struct {
 }
 
 type Field struct {
-	Name    string
-	Type    string
-	Tag     string
-	Comment string
+	Name       string
+	Type       string
+	Tag        string
+	Comment    string
+	ColumnName string
 }
 
 type Data struct {
@@ -52,7 +53,7 @@ type GenCode struct {
 }
 
 func NewGenCode() *GenCode {
-	return &GenCode{Data: Data{HasTime: false, StructName: "DemoTable", TableName: Cmd.TableName}}
+	return &GenCode{Data: Data{HasTime: false, StructName: util.SnakeToCamel(Cmd.TableName), TableName: Cmd.TableName}}
 }
 
 func (g *GenCode) Gen() (result string, err error) {
@@ -68,6 +69,7 @@ func (g *GenCode) Gen() (result string, err error) {
 	}
 
 	g.generateModel()
+	g.generateDao()
 	return
 }
 
@@ -84,14 +86,26 @@ func (g *GenCode) assemblyFields() (err error) {
 
 func (g *GenCode) assemblyField(d Columns) (f Field) {
 	f.Name = util.SnakeToCamel(d.ColumnName)
-	f.Type = "string"
+	f.Type = typeMap[d.DataType]
 	f.Tag = "`gorm:\"column:" + d.ColumnName + "\" json:\"" + d.ColumnName + "\"`"
 	f.Comment = d.ColumnComment
+	f.ColumnName = d.ColumnName
 	return
 }
 
 func (g *GenCode) generateModel() {
-	t, err := template.New("generate").Parse(modelTemplate)
+	t, err := template.New("model").Parse(modelTemplate)
+	if err != nil {
+		panic(err)
+	}
+	err = t.Execute(os.Stdout, g.Data)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (g *GenCode) generateDao() {
+	t, err := template.New("dao").Parse(DaoTemplate)
 	if err != nil {
 		panic(err)
 	}
