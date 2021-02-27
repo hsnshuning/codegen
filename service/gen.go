@@ -74,7 +74,7 @@ func (g *GenCode) Gen() (result string, err error) {
 }
 
 func (g *GenCode) selectColumns(tableName string) (err error) {
-	return db.Where(&Columns{TableName: tableName}).Find(&g.ColumnList).Error
+	return db.Where(&Columns{TableName: tableName, TableSchema: Cmd.DB}).Find(&g.ColumnList).Error
 }
 
 func (g *GenCode) assemblyFields() (err error) {
@@ -87,7 +87,11 @@ func (g *GenCode) assemblyFields() (err error) {
 func (g *GenCode) assemblyField(d Columns) (f Field) {
 	f.Name = util.SnakeToCamel(d.ColumnName)
 	f.Type = typeMap[d.DataType]
-	f.Tag = "`gorm:\"column:" + d.ColumnName + "\" json:\"" + d.ColumnName + "\"`"
+	if d.ColumnKey == "PRI" {
+		f.Tag = "`gorm:\"column:" + d.ColumnName + ",primary_key\" json:\"" + d.ColumnName + "\"`"
+	}else {
+		f.Tag = "`gorm:\"column:" + d.ColumnName + "\" json:\"" + d.ColumnName + "\"`"
+	}
 	f.Comment = d.ColumnComment
 	f.ColumnName = d.ColumnName
 	return
