@@ -64,7 +64,15 @@ func (*{{.StructName}}) Insert (db gorm.DB, data *model.{{.StructName}}) (err er
 }
 
 func (*{{.StructName}}) GetOne (db gorm.DB, id int64) (result *model.{{.StructName}}, err error) {
-	result = new(model.{{.StructName}})
+	tmp := new(model.{{.StructName}})
+	err = db.Where(where).First(tmp).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			err = nil
+		}
+		return
+	}
+	result = tmp
 	err = db.First(result, id).Error
 	return 
 }
@@ -78,6 +86,9 @@ func (*{{.StructName}}) GetList (db gorm.DB, where *model.{{.StructName}}, limit
 }
 
 func (*{{.StructName}}) Update (db gorm.DB, where *model.{{.StructName}}, update *model.{{.StructName}}) (err error) {
-	return db.Where(where).Updates(update).Error
+	if where == nil || update == nil {
+		return errors.New("where or update is nil")
+	}
+	return db.Table(where.TableName()).Where(where).Updates(update).Error
 }
 `

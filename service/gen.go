@@ -88,7 +88,7 @@ func (g *GenCode) assemblyField(d Columns) (f Field) {
 	f.Name = util.SnakeToCamel(d.ColumnName)
 	f.Type = typeMap[d.DataType]
 	if d.ColumnKey == "PRI" {
-		f.Tag = "`gorm:\"column:" + d.ColumnName + ",primary_key\" json:\"" + d.ColumnName + "\"`"
+		f.Tag = "`gorm:\"column:" + d.ColumnName + ";primary_key\" json:\"" + d.ColumnName + "\"`"
 	}else {
 		f.Tag = "`gorm:\"column:" + d.ColumnName + "\" json:\"" + d.ColumnName + "\"`"
 	}
