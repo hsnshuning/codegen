@@ -37,6 +37,7 @@ func ConfigInit() {
 	flag.StringVar(&Cmd.DB, "db", "", "")
 	flag.StringVar(&Cmd.TableName, "t", "", "")
 	flag.StringVar(&Cmd.Args, "a", "charset=utf8mb4&parseTime=True&loc=Local", "")
+	flag.StringVar(&Cmd.Dsn, "dsn", "", "")
 	flag.Parse()
 
 	if !checkCmdConfig(Cmd) {
@@ -47,13 +48,18 @@ func ConfigInit() {
 		fmt.Printf("Error: args invalid, args: %s\n", b)
 		os.Exit(400)
 	}
-	Cmd.Dsn = fmt.Sprintf(dsnTemplate, Cmd.Username, Cmd.Password, Cmd.Address, infoSchema)
-	if len(Cmd.Args) > 0 {
-		Cmd.Dsn += "?" + Cmd.Args
+	if Cmd.Dsn == "" {
+		Cmd.Dsn = fmt.Sprintf(dsnTemplate, Cmd.Username, Cmd.Password, Cmd.Address, infoSchema)
+		if len(Cmd.Args) > 0 {
+			Cmd.Dsn += "?" + Cmd.Args
+		}
 	}
 }
 
 func checkCmdConfig(data *CmdConfig) (ok bool) {
+	if data.Dsn != "" {
+		return true
+	}
 	if len(data.TableName) <= 0 {
 		return
 	} else if len(data.DB) <= 0 {
